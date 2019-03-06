@@ -13,7 +13,11 @@ tempfolder=~/tiftemp
 
 ## find all the tifs and store them in a temp folder
 mkdir $tempfolder
-find $parentfolder/ -type f \( -name '*.jpg' -o -name '*.JPG' \) -exec rsync -a {} $tempfolder \; # test with jpg for now
+# searches for tif, tiff, TIF and TIFF
+find $parentfolder/ -type f \( -name '*.tif*' -o -name '*.TIF*' \) -exec rsync -a {} $tempfolder \; 
 
 # do dpf-manager stuff
-# when ready delete the folder rm -r $tempfolder
+dpf-manager check -recursive --output $outputfolder --format pdf 
+
+# when ready delete the folder
+rm -r $tempfolder
