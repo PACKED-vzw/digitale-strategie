@@ -7,8 +7,9 @@
 
 # variables
 parent=$1
+destination=~/Desktop
 base=$2
 
 # brunnhilde
-brunnhilde.py --hash MD5 --noclam --scanarchives $parent ~/Desktop/$base
+brunnhilde.py --hash MD5 --noclam --scanarchives $parent $destination $base
 

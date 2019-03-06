@@ -12,5 +12,5 @@
 folder=$1
 outputfolder=$2
 
-exiftool -recurse -csv -ext jpg -ext jepg -ext tif -ext tiff $folder > $outputfolder/exiftool.csv
+exiftool -recurse -csv -ext jpg -ext jpeg -ext tif -ext tiff $folder > $outputfolder/exiftool.csv
 
