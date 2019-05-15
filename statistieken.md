@@ -49,10 +49,13 @@ Omdat er een rekensom nodig is, maken we gebruik van variabelen om een aantal wa
 
 ```sql
 SET @dubbels := (SELECT COUNT(DISTINCT filename) FROM siegfried
-WHERE md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5 HAVING COUNT(md5) > 1)AND organisation = $organisation);
+WHERE md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5
+HAVING COUNT(md5) > 1)AND organisation = $organisation);
+
 SET @unieke_dubbels := (SELECT COUNT(DISTINCT md5) FROM siegfried WHERE
 md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5 HAVING COUNT(md5) > 1)
 AND organisation = $organisation);
+
 SELECT @dubbels - @unieke_dubbels AS 'aantal dubbels';
 ```
 
