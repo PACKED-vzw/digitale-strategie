@@ -5,7 +5,7 @@
 Onderstaande query berekent het aantal beeldbestanden.
 
 ```sql
-SELECT COUNT(filename) as 'aantal' FROM siegfried WHERE organisation = $organisation
+SELECT COUNT(filename) as 'aantal' FROM siegfried WHERE organisation = $organisation;
 ```
 
 ## Vereiste opslagcapaciteit voor beeldbestanden
@@ -13,7 +13,8 @@ SELECT COUNT(filename) as 'aantal' FROM siegfried WHERE organisation = $organisa
 Met onderstaande query wordt de opslagcapaciteit in GB berekend. Indien je in het MB wil weten, kies voor POW(1024,2); TB is POW(1024,4)
 
 ```sql
-SELECT ROUND(SUM(filesize)/POW(1024,3)) as 'aantal GB' FROM siegfried WHERE organisation = $organisation
+SELECT ROUND(SUM(filesize)/POW(1024,3)) as 'aantal GB' FROM siegfried
+WHERE organisation = $organisation;
 ```
 
 ## Bestandsformaten van bestanden en hun aantallen
@@ -21,7 +22,8 @@ SELECT ROUND(SUM(filesize)/POW(1024,3)) as 'aantal GB' FROM siegfried WHERE orga
 Met onderstaande query ken je de bestandsformaten en hun hoeveelheid. Ze worden geordend op aantal, van groot naar klein.
 
 ```sql
-SELECT format, COUNT(format) AS 'aantal' FROM siegfried WHERE organisation = $organisation GROUP BY format ORDER BY aantal DESC
+SELECT format, COUNT(format) AS 'aantal' FROM siegfried
+WHERE organisation = $organisation GROUP BY format ORDER BY aantal DESC;
 ```
 
 ## Duplicaten
@@ -30,7 +32,7 @@ SELECT format, COUNT(format) AS 'aantal' FROM siegfried WHERE organisation = $or
 
 ```sql
 SELECT COUNT(DISTINCT md5) AS 'aantal unieke bestanden' FROM siegfried
-WHERE organisation = $organisation
+WHERE organisation = $organisation;
 ```
 
 ### Aantal unieke bestanden die duplicaten hebben
@@ -38,7 +40,7 @@ WHERE organisation = $organisation
 ```sql
 SELECT COUNT(DISTINCT md5) as 'aantal unieke bestanden' FROM siegfried WHERE
 md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation
-GROUP BY md5 HAVING COUNT(md5) > 1) AND organisation = $organisation
+GROUP BY md5 HAVING COUNT(md5) > 1) AND organisation = $organisation;
 ```
 
 ### Aantal duplicaten
