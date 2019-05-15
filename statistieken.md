@@ -5,7 +5,7 @@
 Onderstaande query berekent het aantal beeldbestanden.
 
 ```sql
-SELECT COUNT(filename) FROM siegfried WHERE organisation = $organisation
+SELECT COUNT(filename) as 'aantal' FROM siegfried WHERE organisation = $organisation
 ```
 
 ## Vereiste opslagcapaciteit voor beeldbestanden
@@ -13,7 +13,7 @@ SELECT COUNT(filename) FROM siegfried WHERE organisation = $organisation
 Met onderstaande query wordt de opslagcapaciteit in GB berekend. Indien je in het MB wil weten, kies voor POW(1024,2); TB is POW(1024,4)
 
 ```sql
-SELECT ROUND(SUM(filesize)/POW(1024,3)) FROM siegfried WHERE organisation = $organisation
+SELECT ROUND(SUM(filesize)/POW(1024,3)) as 'aantal GB' FROM siegfried WHERE organisation = $organisation
 ```
 
 ## Bestandsformaten van bestanden en hun aantallen
@@ -21,7 +21,7 @@ SELECT ROUND(SUM(filesize)/POW(1024,3)) FROM siegfried WHERE organisation = $org
 Met onderstaande query ken je de bestandsformaten en hun hoeveelheid. Ze worden geordend op aantal, van groot naar klein.
 
 ```sql
-SELECT format, count(format) AS 'aantal' FROM siegfried WHERE organisation = $organisation GROUP BY format ORDER BY aantal DESC
+SELECT format, COUNT(format) AS 'aantal' FROM siegfried WHERE organisation = $organisation GROUP BY format ORDER BY aantal DESC
 ```
 
 ## Duplicaten
@@ -29,13 +29,16 @@ SELECT format, count(format) AS 'aantal' FROM siegfried WHERE organisation = $or
 ### Aantal unieke bestanden
 
 ```sql
-SELECT count(distinct md5) AS 'aantal' FROM siegfried WHERE organisation = $organisation
+SELECT COUNT(DISTINCT md5) AS 'aantal unieke bestanden' FROM siegfried
+WHERE organisation = $organisation
 ```
 
 ### Aantal unieke bestanden die duplicaten hebben
 
 ```sql
-SELECT count(distinct md5) FROM siegfried WHERE md5 in (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5 HAVING COUNT(md5) > 1) AND organisation = $organisation
+SELECT COUNT(DISTINCT md5) as 'aantal unieke bestanden' FROM siegfried WHERE
+md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation
+GROUP BY md5 HAVING COUNT(md5) > 1) AND organisation = $organisation
 ```
 
 ### Aantal duplicaten
@@ -43,9 +46,12 @@ SELECT count(distinct md5) FROM siegfried WHERE md5 in (SELECT md5 FROM siegfrie
 Omdat er een rekensom nodig is, maken we gebruik van variabelen om een aantal waarden op te slaan en om zo vervolgens het aantal dubbele bestanden te geven. Hiervoor moet het totaal aantal dubbels (inclusief het unieke bestand) afgetrokken worden van het aantal unieke bestanden met dubbels.
 
 ```sql
-SET @dubbels := (SELECT COUNT(DISTINCT filename) FROM siegfried WHERE md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5 HAVING COUNT(md5) > 1) AND organisation = $organisation);
-SET @unieke_dubbels := (SELECT COUNT(DISTINCT md5) FROM siegfried WHERE md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5 HAVING COUNT(md5) > 1) AND organisation = $organisation);
-SELECT @dupes - @distinct_dupes AS 'Aantal dubbels';
+SET @dubbels := (SELECT COUNT(DISTINCT filename) FROM siegfried
+WHERE md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5 HAVING COUNT(md5) > 1)AND organisation = $organisation);
+SET @unieke_dubbels := (SELECT COUNT(DISTINCT md5) FROM siegfried WHERE
+md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5 HAVING COUNT(md5) > 1)
+AND organisation = $organisation);
+SELECT @dubbels - @unieke_dubbels AS 'aantal dubbels';
 ```
 
 ## TODO
