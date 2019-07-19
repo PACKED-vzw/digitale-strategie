@@ -38,9 +38,10 @@ WHERE organisation = $organisation;
 ### Aantal unieke bestanden die duplicaten hebben
 
 ```sql
-SELECT COUNT(DISTINCT md5) as 'aantal unieke bestanden' FROM siegfried WHERE
-md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation
-GROUP BY md5 HAVING COUNT(md5) > 1) AND organisation = $organisation;
+SELECT COUNT(DISTINCT md5) as 'unieke bestanden met dubbels' FROM siegfried t1
+WHERE organisation = $organisation
+AND EXISTS (SELECT 1 from siegfried t2 WHERE t2.md5 = t1.md5
+AND organisation = $organisation AND t1.filename != t2.filename))
 ```
 
 ### Aantal duplicaten
@@ -57,6 +58,21 @@ md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md
 HAVING COUNT(md5) > 1) AND organisation = $organisation);
 
 SELECT @dubbels - @unieke_dubbels AS 'aantal dubbels';
+```
+
+### Vereiste opslagcapaciteit dubbels
+
+```sql
+SET @opslag_alle_dubbels := (SELECT ROUND(SUM(filesize)/POW(1024,3)) FROM siegfried WHERE md5
+IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5
+HAVING COUNT(md5) > 1) AND organisation = $organisation);
+
+SET @opslag_unieke_dubbels := (SELECT ROUND(SUM(size)/POW(1024,3)) FROM (SELECT md5 as md5, filesize AS size FROM siegfried WHERE
+md5 in (SELECT DISTINCT md5 FROM siegfried WHERE
+md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md5
+HAVING COUNT(md5) > 1)) AND organisation = $organisation GROUP BY md5, filesize) temp);
+
+SELECT @opslag_alle_dubbels - @opslag_unieke_dubbels AS 'GB dubbels';
 ```
 
 ## TODO
