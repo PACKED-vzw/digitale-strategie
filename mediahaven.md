@@ -226,8 +226,8 @@ Om beelden te exporteren uit Mediahaven moeten een aantal zaken gedaan worden:
 
 ```bash
 curl -X GET \
-    -H 'Accept: application/json'
-    -H "Authorization: Bearer ${TOKEN}"
+    -H 'Accept: application/json' \
+    -H "Authorization: Bearer ${TOKEN}" \
     https://hasselt.debeeldbank.be/mediahaven-rest-api/resources/exportlocations \
     | jq .
 ```
@@ -315,7 +315,7 @@ curl -X POST \
 Uiteraard kan ook deze id opgenomen worden als shell variabele
 
 ```bash
-JOB_ID=$(curl -X POST \
+JOB_ID=$(curl -s -X POST \
     -H 'Accept: application/json' \
     -H "Authorization: Bearer ${TOKEN}" \
     "https://hasselt.debeeldbank.be/mediahaven-rest-api/resources/media/${FRAGMENT_ID}/export/${EXPORT_ID}" \
