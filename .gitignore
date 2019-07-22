@@ -1,2 +1,4 @@
 # privacy stuff
 .env
+*.csv
+*_MH.json
