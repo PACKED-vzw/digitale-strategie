@@ -1,6 +1,8 @@
-# Statistieken doorlichting beelden Stad Hasselt
+# Statistieken berekenen
 
-## Aantal beeldbestanden
+## Doorlichting beelden Stad Hasselt
+
+### Aantal beeldbestanden
 
 Onderstaande query berekent het aantal beeldbestanden.
 
@@ -8,7 +10,7 @@ Onderstaande query berekent het aantal beeldbestanden.
 SELECT COUNT(filename) as 'aantal' FROM siegfried WHERE organisation = $organisation;
 ```
 
-## Vereiste opslagcapaciteit voor beeldbestanden
+### Vereiste opslagcapaciteit voor beeldbestanden
 
 Met onderstaande query wordt de opslagcapaciteit in GB berekend. Indien je in het MB wil weten, kies voor POW(1024,2); TB is POW(1024,4)
 
@@ -17,7 +19,7 @@ SELECT ROUND(SUM(filesize)/POW(1024,3)) as 'aantal GB' FROM siegfried
 WHERE organisation = $organisation;
 ```
 
-## Bestandsformaten van bestanden en hun aantallen
+### Bestandsformaten van bestanden en hun aantallen
 
 Met onderstaande query ken je de bestandsformaten en hun hoeveelheid. Ze worden geordend op aantal, van groot naar klein.
 
@@ -26,16 +28,16 @@ SELECT format, COUNT(format) AS 'aantal' FROM siegfried
 WHERE organisation = $organisation GROUP BY format ORDER BY aantal DESC;
 ```
 
-## Duplicaten
+### Duplicaten
 
-### Aantal unieke bestanden
+#### Aantal unieke bestanden
 
 ```sql
 SELECT COUNT(DISTINCT md5) AS 'aantal unieke bestanden' FROM siegfried
 WHERE organisation = $organisation;
 ```
 
-### Aantal unieke bestanden die duplicaten hebben
+#### Aantal unieke bestanden die duplicaten hebben
 
 ```sql
 SELECT COUNT(DISTINCT md5) as 'unieke bestanden met dubbels' FROM siegfried t1
@@ -44,7 +46,7 @@ AND EXISTS (SELECT 1 from siegfried t2 WHERE t2.md5 = t1.md5
 AND organisation = $organisation AND t1.filename != t2.filename))
 ```
 
-### Aantal duplicaten
+#### Aantal duplicaten
 
 Omdat er een rekensom nodig is, maken we gebruik van variabelen om een aantal waarden op te slaan en om zo vervolgens het aantal dubbele bestanden te geven. Hiervoor moet het totaal aantal dubbels (inclusief het unieke bestand) afgetrokken worden van het aantal unieke bestanden met dubbels.
 
@@ -60,7 +62,7 @@ HAVING COUNT(md5) > 1) AND organisation = $organisation);
 SELECT @dubbels - @unieke_dubbels AS 'aantal dubbels';
 ```
 
-### Vereiste opslagcapaciteit dubbels
+#### Vereiste opslagcapaciteit dubbels
 
 ```sql
 SET @opslag_alle_dubbels := (SELECT ROUND(SUM(filesize)/POW(1024,3)) FROM siegfried WHERE md5
@@ -73,6 +75,34 @@ md5 IN (SELECT md5 FROM siegfried WHERE organisation = $organisation GROUP BY md
 HAVING COUNT(md5) > 1)) AND organisation = $organisation GROUP BY md5, filesize) temp);
 
 SELECT @opslag_alle_dubbels - @opslag_unieke_dubbels AS 'GB dubbels';
+```
+
+## Aanvullingen na Svend
+
+Enkele aanvullingen na het gebruik van de databank voor Svend T.
+
+### Hulptabellen
+
+#### Creëer een view met distincte md5
+
+Dit om bv. de opslag voor de unieke videobestanden te kunnen berekenen
+
+```sql
+CREATE VIEW unique_video 
+AS
+SELECT DISTINCT md5, filesize FROM siegfried 
+WHERE mime LIKE 'video/%' 
+```
+
+#### Creëer een view met enkel videobestanden
+
+De focus lag op de video's van Svend T.
+
+```sql
+CREATE VIEW video
+AS
+SELECT * FROM siegfried
+WHERE mime LIKE 'video/%'
 ```
 
 ## TODO
